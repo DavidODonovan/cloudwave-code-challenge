@@ -2,14 +2,16 @@
   "name": "backend",
   "version": "1.0.0",
   "scripts": {
-    "start": "nodemon server.ts",
+    "start": "nodemon src/server.ts",
     "test": "vitest",
     "build": "tsc"
   },
   "devDependencies": {
     "@types/express": "^5.0.0",
     "@types/jest": "^29.5.14",
+    "@types/pg": "^8.11.11",
     "@types/socket.io": "^3.0.2",
+    "drizzle-kit": "^0.30.5",
     "nodemon": "^3.1.9",
     "prettier": "^3.4.2",
     "ts-jest": "^29.2.5",
@@ -19,7 +21,9 @@
   },
   "dependencies": {
     "cors": "^2.8.5",
+    "drizzle-orm": "^0.40.0",
     "express": "^5.0.1",
+    "pg": "^8.13.3",
     "socket.io": "^4.8.1"
   }
 }
