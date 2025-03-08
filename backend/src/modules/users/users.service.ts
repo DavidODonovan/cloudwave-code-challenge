@@ -9,17 +9,16 @@ export class UsersService {
         this.db = db;
     };
 
-    createUser = async (req, res) => {
+    createUser = async (payload) => {
         // return this.db.insert(usersTable, user);
         try {
-            const { name } = req.body;
-            console.log('create user here is your service~~~~~~====>', req.body);
+            console.log('create user here is your service~~~~~~====>', payload);
             // const user = await this.db.insert(usersTable, { name });
             // // console.log('user created====>', user);
-            res.send(req.body.name);
+            return payload;
         } catch (error) {
-            console.log('error====>', error); 
-            res.status(400).send(error);
+            console.log('service error====>', error); 
+            throw error;
         }
     };
 }
