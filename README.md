@@ -1,3 +1,11 @@
+## Generate db migration file from Prisma schema:
+```npm run db:generate```
+
+## Run the migrations inside dev docker postgres container 
+```docker-compose exec backend npm run db:migrate```
+
+
+
 # CloudWave Full Stack Code Challenge ~ Wave Chat
 CloudWave have provided scaffolding for both the front and back end of the challenge, to save you time.
 
