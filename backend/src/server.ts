@@ -9,28 +9,13 @@ import { Pool } from 'pg';
 
 import { UsersController } from './modules/users/users.controller';
 
-const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-});
-
 const app = express();
 const httpServer = http.createServer(app);
 const io = new IOServer(httpServer);
+
+// drizzle setup - database connection and migrations
+const pool = new Pool({ connectionString: process.env.DATABASE_URL });
 const db = drizzle(pool);
-
-// middleware
-app.use(cors({ origin: '*' }));
-app.use(express.json()); 
-
-
-app.get('/', (req, res) => {
-  res.send('Hello World!');
-});
-
-app.use('/api/users/',new UsersController(db).router);
-
-
-// drizzle setup
 async function initialiseDatabase() {
   try {
     await migrate(db, { migrationsFolder: 'drizzle' });
@@ -39,12 +24,22 @@ async function initialiseDatabase() {
     console.log('Database initialisation failed', error);
     process.exit(1);
   }
-}
+};
 
+// middleware
+app.use(cors({ origin: '*' }));
+app.use(express.json()); 
+
+// controllers
+const usersController = new UsersController(db).router;
+app.use('/api/users/', usersController);
+
+// socket.io connection
 io.on('connection', (socket) => {
   console.log("a user connected");
 });
 
+// start server
 httpServer.listen(CONFIG.PORT, async () => {
   console.log(`Server listening on *:${CONFIG.PORT} 🚀`);
   await initialiseDatabase();

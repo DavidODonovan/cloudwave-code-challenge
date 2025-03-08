@@ -13,7 +13,7 @@ export class UsersService {
         // return this.db.insert(usersTable, user);
         try {
             const { name } = req.body;
-            console.log('create user here is your service====>', req.body);
+            console.log('create user here is your service~~~~~~====>', req.body);
             // const user = await this.db.insert(usersTable, { name });
             // // console.log('user created====>', user);
             res.send(req.body.name);
