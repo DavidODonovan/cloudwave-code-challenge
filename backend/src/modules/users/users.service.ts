@@ -1,10 +1,10 @@
 
 import { eq } from "drizzle-orm";
-import { usersTable } from "../db/schema";
+import { usersTable } from "../../db/schema";
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
-import { User } from "../db/schema";
+import { User } from "../../db/schema";
 
-class UserController {
+export class UsersService {
     constructor(private db: NodePgDatabase) {
         this.db = db;
     };
@@ -13,7 +13,7 @@ class UserController {
         // return this.db.insert(usersTable, user);
         try {
             const { name } = req.body;
-            console.log('create user here====>', req.body);
+            console.log('create user here is your service====>', req.body);
             // const user = await this.db.insert(usersTable, { name });
             // // console.log('user created====>', user);
             res.send(req.body.name);
@@ -23,5 +23,3 @@ class UserController {
         }
     };
 }
-
-export default UserController;

@@ -7,8 +7,7 @@ import CONFIG from '../config';
 import { migrate } from 'drizzle-orm/postgres-js/migrator'
 import { Pool } from 'pg';
 
-import UserController from './controllers/UserController';
-import createUserRoutes from './routes/userRoutes';
+import { UsersController } from './modules/users/users.controller';
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
@@ -23,16 +22,12 @@ const db = drizzle(pool);
 app.use(cors({ origin: '*' }));
 app.use(express.json()); 
 
-//controllers
-const userController = new UserController(db)
 
-// routes
-const userRoutes = createUserRoutes(userController);
 app.get('/', (req, res) => {
   res.send('Hello World!');
 });
 
-app.use('/api/users/',userRoutes);
+app.use('/api/users/',new UsersController(db).router);
 
 
 // drizzle setup
