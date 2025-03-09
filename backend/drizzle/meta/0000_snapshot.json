@@ -1,5 +1,5 @@
 {
-  "id": "bc1d7979-98e5-4400-a0f5-a7d78d190844",
+  "id": "8aa72be4-53f2-4236-a2b4-a956ca398551",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -33,6 +33,13 @@
           "type": "varchar(64)",
           "primaryKey": false,
           "notNull": true
+        },
+        "online": {
+          "name": "online",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
         },
         "updated_at": {
           "name": "updated_at",

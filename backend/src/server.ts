@@ -14,7 +14,7 @@ const app = express();
 const httpServer = http.createServer(app);
 const io = new IOServer(httpServer);
 
-// drizzle setup - database connection and migrations
+// drizzle setup - database connection and migrations, seed database with fake users.
 const pool = new Pool({ connectionString: process.env.DATABASE_URL });
 const db = drizzle(pool);
 async function initialiseDatabase() {

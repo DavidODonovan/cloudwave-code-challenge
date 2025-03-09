@@ -3,6 +3,7 @@ CREATE TABLE "users" (
 	"busy" boolean DEFAULT false NOT NULL,
 	"created_at" timestamp DEFAULT now() NOT NULL,
 	"name" varchar(64) NOT NULL,
+	"online" boolean DEFAULT false NOT NULL,
 	"updated_at" timestamp DEFAULT now() NOT NULL,
 	CONSTRAINT "users_name_unique" UNIQUE("name")
 );

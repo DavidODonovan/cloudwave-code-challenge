@@ -5,6 +5,7 @@ export const usersTable = pgTable("users", {
   busy: boolean('busy').default(false).notNull(),
   created_at: timestamp('created_at').defaultNow().notNull(),
   name: varchar({ length: 64 }).notNull().unique(),
+  online: boolean('online').default(false).notNull(),
   updated_at: timestamp('updated_at').defaultNow().notNull(),
 });
 
