@@ -1,6 +1,6 @@
 import { Router, Request, Response } from 'express';
 import { UsersService } from './users.service';
-import { validateUser } from './users.validator';
+import { createUserSchema } from './users.validator';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
 
 export class UsersController { 
@@ -21,14 +21,11 @@ export class UsersController {
   // don't use arrow functions here, as we need to bind the context using .bind(this) as above to avoid TypeScript errors...
   private async createUser(req: Request, res: Response): Promise<Response> {
       try {
-          const result = validateUser(req.body);
-          if (!result.success) {
-              return res.status(400).json({ errors: result.error.format() });
-          }
-          
-          const user = await this.usersService.createUser(result.data);
-          return res.status(201).json(user);
+          createUserSchema.parse(req.body); // validate incoming request body, will throw an error if invalid.
+          const user = await this.usersService.createUser(req.body); // forward payload to service for insertion into database.
+          return res.status(201).json(user); // return the created user in the response.
       } catch (error) {
+          // catch all errors from validation, service, etc. and return a 500 error with a message.
           return res.status(500).json({ 
               message: error instanceof Error ? error.message : 'Unknown error' 
           });
