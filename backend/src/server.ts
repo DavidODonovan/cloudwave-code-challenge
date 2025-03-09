@@ -6,6 +6,7 @@ import { drizzle } from 'drizzle-orm/node-postgres';
 import CONFIG from '../config';
 import { migrate } from 'drizzle-orm/postgres-js/migrator'
 import { Pool } from 'pg';
+import { seedFakeUsers } from './utils/seedFakeUsers';
 
 import { UsersController } from './modules/users/users.controller';
 
@@ -19,7 +20,9 @@ const db = drizzle(pool);
 async function initialiseDatabase() {
   try {
     await migrate(db, { migrationsFolder: 'drizzle' });
-    console.log('Database initialisation complete. Migrations completed successfully.')
+    console.log('Database initialisation complete. Migrations completed successfully.');
+    await seedFakeUsers(db);
+    console.log('Fake users seeded successfully.');
   } catch (error) {
     console.log('Database initialisation failed', error);
     process.exit(1);
