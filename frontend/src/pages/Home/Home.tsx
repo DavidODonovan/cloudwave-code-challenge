@@ -20,6 +20,7 @@ type User = {
 
 export default function Home({ socket }: { socket: Socket }) {
   const [userList, setUserList] = useState<User[]>([]);
+  const [user, setUser] = useState<User | null>(null);
   const [inputValue, setInputValue] = useState('');
   const [socketId, setSocketId] = useState<string | undefined>();
   const [userId, setUserId] = useState(() => {
@@ -41,6 +42,15 @@ export default function Home({ socket }: { socket: Socket }) {
     };
     handleFetchUserList();
   }, []);
+
+  useEffect(()=>{
+    const user = userList.find((user) => user.id.toString() === userId);
+    console.log("user should be:", user);
+    console.log("user should be:", userList);
+    if(user){
+    setUser(user);
+    }
+  }, [userList, userId]);
 
   useEffect(()=>{
     socket.on(CONNECT, () => {
@@ -69,7 +79,7 @@ export default function Home({ socket }: { socket: Socket }) {
       socket.emit('message', {
         sender_user_id: userId, 
         sender_socket_id: socket.id,
-        receiver_user_id: '0',
+        receiver_user_id: '1',
         message: inputValue
       });
       setInputValue('');
@@ -84,7 +94,7 @@ export default function Home({ socket }: { socket: Socket }) {
 
   return (
     <Card className="flex flex-col items-center justify-center min-h-svh">
-      {userId}
+      {user && user.name}{userId}
       <Carousel className="w-full max-w-xs">
         <CarouselContent>
           {userList.map((user, index) => (
@@ -95,7 +105,7 @@ export default function Home({ socket }: { socket: Socket }) {
                     <Button 
                       variant="ghost" 
                       className="text-4xl font-semibold hover:cursor-pointer"
-                      onClick={()=>{setUserId(index.toString())}}
+                      onClick={()=>{setUserId(user.id.toString())}}
                       >
                         {user.name}
                     </Button>
