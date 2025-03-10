@@ -54,13 +54,15 @@ export default function Home({ socket }: { socket: Socket }) {
   }, [socket, userId]);
 
 
+  //TODO: send message, if message is received, go to chat page and set url params to receiver user_id.
+  // When in chat page, fetch messages from database with both user ids.
 
   const handleSendMessage = () => {
     if (socket.connected) {
       socket.emit('message', {
         sender_user_id: userId, 
         sender_socket_id: socket.id,
-        receiver_user_id: 'hallo',
+        receiver_user_id: '0',
         message: inputValue
       });
       setInputValue('');

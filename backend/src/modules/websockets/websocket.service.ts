@@ -32,9 +32,13 @@ export class WebSocketService {
 
     handleMessage(message: any): void {
         console.log('message received', message);
-        console.log('message sent to all clients');
         // TODO emit message event to recipient using message.receiver_id and save message to database messages table with both ids.
-        // this.io.to(message.receiver_id).emit('message', message);
+        const receiverSocketId = this.socketsMap.get(message.receiver_user_id);
+        console.log({receiverSocketId});
+        console.log('sockets:', this.socketsMap);
+        if (receiverSocketId) {
+            this.io.to(receiverSocketId).emit('message', message);
+        };
     }
 
 };
