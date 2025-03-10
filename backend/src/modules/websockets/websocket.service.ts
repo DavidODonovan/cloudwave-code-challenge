@@ -1,6 +1,10 @@
 
 import { Server as IOServer, Socket } from 'socket.io';
 import { CONNECTION, MESSAGE, REGISTER, DISCONNECT, USER_LIST_UPDATE } from '../../constants';
+import { findNonEmptyArrays } from '../../utils/helpers';
+
+
+
 export class WebSocketService {
 
     private userSocketMap = {};
@@ -31,9 +35,11 @@ export class WebSocketService {
         this.userSocketMap[userKey] ? this.userSocketMap[userKey].push(socket_id) : this.userSocketMap[userKey] = [socket_id];
         this.socketUserMap[socket_id] ? this.socketUserMap[socket_id].push(user_id) : this.socketUserMap[socket_id] = [user_id];
         console.log('userSocketMap register:', this.userSocketMap);
-        // emit event to all clients/users with updated userlist
-        // socket.emit('userlist', Array.from(this.userSocketMap.keys()));
-        this.io.emit(USER_LIST_UPDATE, Object.keys(this.userSocketMap));
+
+        // emit event to all clients/users with list of connected users
+        const connectedUsers = findNonEmptyArrays(this.userSocketMap);
+
+        this.io.emit(USER_LIST_UPDATE, connectedUsers);
     };
 
     handleMessage(message: any): void {
@@ -73,8 +79,10 @@ export class WebSocketService {
         console.log('userSocketMap after disconnect:', this.userSocketMap);
         console.log('socketUserMap after disconnect:', this.socketUserMap);
 
-        // emit event to all clients/users with updated userlist
-        this.io.emit(USER_LIST_UPDATE, Object.keys(this.userSocketMap));
+        // emit event to all clients/users with list of connected users
+        const connectedUsers = findNonEmptyArrays(this.userSocketMap);
+  
+        this.io.emit(USER_LIST_UPDATE, connectedUsers);
     }
 
 };
