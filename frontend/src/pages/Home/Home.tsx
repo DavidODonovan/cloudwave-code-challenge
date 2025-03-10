@@ -51,11 +51,15 @@ export default function Home({ socket }: { socket: Socket }) {
   }, [socket, userId]);
 
 
+
   const handleSendMessage = () => {
     if (socket.connected) {
       console.log("helloo I am connected...", inputValue)
       socket.emit('message', {
-        content: inputValue
+        sender_user_id: userId, 
+        sender_socket_id: socket.id,
+        receiver_user_id: 'hallo',
+        message: inputValue
       });
       setInputValue('');
     }

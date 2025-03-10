@@ -3,6 +3,9 @@ import { Server as IOServer, Socket } from 'socket.io';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
 
 export class WebSocketService {
+
+    private sockets = new Map<string, string>();
+
     constructor(
       private io: IOServer,
       private db: NodePgDatabase
@@ -19,6 +22,14 @@ export class WebSocketService {
         socket.on('register', this.handleRegister.bind(this));
     }
 
+    handleRegister({ user_id, socket_id }: { user_id: string, socket_id: string }): void {
+        console.log('new register event:', user_id, socket_id);
+
+        //TODO map user_id to socket_id object
+        this.sockets.set(user_id, socket_id);
+        console.log('sockets:', this.sockets);
+    }
+
     handleMessage(message: any): void {
         console.log('message received', message);
         this.io.emit('message', message);
@@ -26,7 +37,4 @@ export class WebSocketService {
         // emit message event to recipient and save message to database messages table.
     }
 
-    handleRegister({ user_id, socket_id }: { user_id: string, socket_id: string }): void {
-        console.log('new register event:', user_id, socket_id);
-    }
 };
