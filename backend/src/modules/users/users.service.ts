@@ -10,13 +10,14 @@ export class UsersService {
     createUser = async (payload): Promise<NewUser> => {
         const user: typeof usersTable.$inferInsert = {
             name: payload.name,
-          };
+        };
+
         try {
             const newUserArray = await this.db.insert(usersTable).values(user).returning();
             return newUserArray[0];
         } catch (error) {
             throw error;
-        }
+        };
     };
 
     getAllUsers = async (): Promise<User[]> => {
@@ -25,11 +26,10 @@ export class UsersService {
             return users;
         } catch (error) {
             throw error;
-        }
-    }
+        };
+    };
 
     getUserById = async (id: number): Promise<User> => {
-        console.log("service id", id);
         try {
             const user = await this.db.select().from(usersTable).where(eq(usersTable.id, id));
             if(user.length === 0) {
@@ -38,6 +38,6 @@ export class UsersService {
             return user[0];
         } catch (error) {
             throw error;
-        }
-    }
+        };
+    };
 }

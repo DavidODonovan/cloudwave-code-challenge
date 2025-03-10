@@ -4,7 +4,19 @@
 ## Run the migrations inside dev docker postgres container 
 ```docker-compose exec backend npm run db:migrate```
 
-
+| Action | Command |
+|--------|---------|
+| Stop & remove containers | `docker-compose down` |
+| Remove volumes (optional) | `docker-compose down -v` |
+| Rebuild backend (if needed) | `docker-compose build` |
+| Clean up 'dangling volumes' | `docker volume prune`|
+| Clean build of new containers |`docker-compose build --no-cache`|
+| Start containers | `docker-compose up -d` |
+| Check logs | `docker-compose logs backend` |
+| Inspect DB | `docker-compose exec db psql -U user -d mydatabase` |
+| Drop db| `npm run db:drop`|
+| Generate new migration file(s) | `npm run db:generate`|
+| Run migrations | `docker-compose exec backend npm run db:migrate`|
 
 # CloudWave Full Stack Code Challenge ~ Wave Chat
 CloudWave have provided scaffolding for both the front and back end of the challenge, to save you time.
