@@ -9,7 +9,9 @@ import {
   CarouselItem,
   CarouselNext,
   CarouselPrevious,
-} from "@/components/ui/carousel"
+} from "@/components/ui/carousel";
+
+import { CONNECT, MESSAGE, REGISTER, USER_LIST } from '../../constants'
 
 type User = {
   id: string;
@@ -41,18 +43,21 @@ export default function Home({ socket }: { socket: Socket }) {
   }, []);
 
   useEffect(()=>{
-    socket.on('connect', () => {
+    socket.on(CONNECT, () => {
       setSocketId(socket.id);
-      socket.emit('register', { user_id: userId, socket_id: socket.id });
+      socket.emit(REGISTER, { user_id: userId, socket_id: socket.id });
     });
     if(socket.connected){
-      socket.emit('register', { user_id: userId, socket_id: socket.id });
+      socket.emit(REGISTER, { user_id: userId, socket_id: socket.id });
     }
-    socket.on('message', (message) => {
+    socket.on(MESSAGE, (message) => {
       console.log('message received:', message);
     });
 
-    
+    socket.on(USER_LIST, (userlist) => {
+      console.log('userlist:', userlist);
+    });
+
   }, [socket, userId]);
 
 

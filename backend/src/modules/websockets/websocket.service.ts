@@ -1,7 +1,7 @@
 
 import { Server as IOServer, Socket } from 'socket.io';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
-
+import { CONNECTION, MESSAGE, REGISTER, DISCONNECT, USER_LIST } from '../../constants';
 export class WebSocketService {
 
     private socketsMap = new Map<string, string>();
@@ -14,14 +14,14 @@ export class WebSocketService {
     }
 
     initialize(): void {
-        this.io.on('connection', this.handleConnection.bind(this));
+        this.io.on(CONNECTION, this.handleConnection.bind(this));
     }
 
     handleConnection(socket: Socket): void {
         const socketId = socket.id;
-        socket.on('message', (data)=>this.handleMessage(data));
-        socket.on('register', (data)=>this.handleRegister(data, socket));
-        socket.on('disconnect', (reason)=>this.handleDisconnect(reason, socketId, socket ));
+        socket.on(MESSAGE, (data)=>this.handleMessage(data));
+        socket.on(REGISTER, (data)=>this.handleRegister(data, socket));
+        socket.on(DISCONNECT, (reason)=>this.handleDisconnect(reason, socketId, socket ));
     };
 
     // handleRegister({ user_id, socket_id }: { user_id: string, socket_id: string }): void {
@@ -50,9 +50,10 @@ export class WebSocketService {
         console.log('socket disconnected:', socketId, 'reason:', reason);
         if(socketId){
           this.socketsMap.delete(socketId);
-        }
         // emit event to all clients/users with updated userlist
-        socket.emit('userlist', Array.from(this.socketsMap.keys()));
+        socket.emit(USER_LIST, Array.from(this.socketsMap.keys()));
+        console.log('socket should have emitted:');
+        }
     }
 
 };
