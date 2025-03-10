@@ -16,6 +16,7 @@ import { API_URL_USERS, CONNECT, MESSAGE, REGISTER, USER_LIST_UPDATE} from '../.
 type User = {
   id: string;
   name: string;
+  online?: boolean;
 };
 
 export default function Home({ socket, getNewSocketConnection }: { socket: Socket, getNewSocketConnection: () => void }) {
@@ -40,6 +41,21 @@ export default function Home({ socket, getNewSocketConnection }: { socket: Socke
       .catch(err => console.error("Failed to fetch users:", err));
   };
 
+  const handleUpdateUserStatuses= (data: any) => {
+    console.log("handleUpdateUserStatuses called", data)
+    console.log("typeof data", typeof data[0])
+    if(userList.length === 0) return;
+    console.log('hellooooooooo')
+
+    const updatedUserList = userList.map(user => {
+      return {...user,
+        // Set online to true if user's ID is in the onlineIdsSet, otherwise false
+        online: data.has(user.id.toString())
+      };
+    });
+    setUserList(updatedUserList);
+  }
+
   // Fetch user list once on component mount
   useEffect(() => {
     handleFetchUsers();
@@ -52,6 +68,10 @@ export default function Home({ socket, getNewSocketConnection }: { socket: Socke
       setUser(currentUser);
     }
   }, [userList, userId]);
+
+  useEffect(()=>{
+    console.log({userList})
+  },[userList])
 
   // Set up socket listeners and handle cleanup
   useEffect(() => {
@@ -75,7 +95,7 @@ export default function Home({ socket, getNewSocketConnection }: { socket: Socke
     // Register connect handler
     socket.on(CONNECT, handleConnect);
     socket.on(MESSAGE, handleMessage);
-    socket.on(USER_LIST_UPDATE, (data)=>{console.log("user list update event:", data)});
+    socket.on(USER_LIST_UPDATE, handleUpdateUserStatuses);
 
     // If already connected, register immediately
     if (socket.connected) {
@@ -87,7 +107,7 @@ export default function Home({ socket, getNewSocketConnection }: { socket: Socke
     return () => {
       socket.off(CONNECT, handleConnect);
       socket.off(MESSAGE, handleMessage);
-      socket.off(USER_LIST_UPDATE, handleFetchUsers)
+      socket.off(USER_LIST_UPDATE, handleUpdateUserStatuses)
     };
   }, [socket, userId]);
 
@@ -147,7 +167,10 @@ export default function Home({ socket, getNewSocketConnection }: { socket: Socke
         
         <div className="mt-4">
           {userList.map((user) => (
-            <div key={user.id}>{user.name}</div>
+            <div key={user.id}>
+              {/* <div>{user.online ? '🟢' : '🔴'} {user.name}</div> */}
+              <div>{user.online ? '🟢' : '🔴'} {user.name}</div>
+            </div>
           ))}
         </div>
       </div>

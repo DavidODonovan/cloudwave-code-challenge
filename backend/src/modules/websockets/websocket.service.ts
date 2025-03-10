@@ -27,7 +27,6 @@ export class WebSocketService {
         socket.on(DISCONNECT, (reason)=>this.handleDisconnect(reason, socketId));
     };
 
-    // handleRegister({ user_id, socket_id }: { user_id: string, socket_id: string }): void {
     handleRegister(data): void {
         const { user_id, socket_id } = data;
         const userKey = user_id.toString();
