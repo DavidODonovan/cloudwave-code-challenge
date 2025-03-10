@@ -20,7 +20,12 @@ export default function Home({ socket }: { socket: Socket }) {
   const [userList, setUserList] = useState<User[]>([]);
   const [inputValue, setInputValue] = useState('');
   const [socketId, setSocketId] = useState<string | undefined>();
-  const [ userId, setUserId ] = useState<string | undefined>("0");
+  const [userId, setUserId] = useState(() => {
+    // Check if userId exists in localStorage during initialization
+    const savedUserId = localStorage.getItem('cloudWaveChatId');
+    console.log('User ID retrieved from localStorage:', savedUserId);
+    return savedUserId || '';
+  });
 
   useEffect(() => {
     if (userId) {
