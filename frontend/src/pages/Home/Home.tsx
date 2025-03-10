@@ -11,7 +11,7 @@ import {
   CarouselPrevious,
 } from "@/components/ui/carousel";
 
-import { API_URL_USERS, CONNECT, MESSAGE, REGISTER } from '../../constants'
+import { API_URL_USERS, CONNECT, MESSAGE, REGISTER, USER_LIST_UPDATE} from '../../constants';
 
 type User = {
   id: string;
@@ -32,17 +32,22 @@ export default function Home({ socket, getNewSocketConnection }: { socket: Socke
     getNewSocketConnection();
   };
 
-  // Fetch user list once on component mount
-  useEffect(() => {
+  const handleFetchUsers = () => {
+    console.log('fetch users called')
     fetch(API_URL_USERS)
       .then(res => res.json())
       .then(users => setUserList(users))
       .catch(err => console.error("Failed to fetch users:", err));
+  };
+
+  // Fetch user list once on component mount
+  useEffect(() => {
+    handleFetchUsers();
   }, []);
 
   // Update current user when userList or userId changes
   useEffect(() => {
-    const currentUser = userList.find(u => u.id.toString() === userId);
+    const currentUser = userList.find(user => user.id.toString() === userId);
     if (currentUser) {
       setUser(currentUser);
     }
@@ -70,6 +75,7 @@ export default function Home({ socket, getNewSocketConnection }: { socket: Socke
     // Register connect handler
     socket.on(CONNECT, handleConnect);
     socket.on(MESSAGE, handleMessage);
+    socket.on(USER_LIST_UPDATE, (data)=>{console.log("user list update event:", data)});
 
     // If already connected, register immediately
     if (socket.connected) {
@@ -81,6 +87,7 @@ export default function Home({ socket, getNewSocketConnection }: { socket: Socke
     return () => {
       socket.off(CONNECT, handleConnect);
       socket.off(MESSAGE, handleMessage);
+      socket.off(USER_LIST_UPDATE, handleFetchUsers)
     };
   }, [socket, userId]);
 

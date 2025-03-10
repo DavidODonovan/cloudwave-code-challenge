@@ -1,6 +1,6 @@
 
 import { Server as IOServer, Socket } from 'socket.io';
-import { CONNECTION, MESSAGE, REGISTER, DISCONNECT, USER_LIST } from '../../constants';
+import { CONNECTION, MESSAGE, REGISTER, DISCONNECT, USER_LIST_UPDATE } from '../../constants';
 export class WebSocketService {
 
     private userSocketMap = {};
@@ -19,12 +19,12 @@ export class WebSocketService {
     handleConnection(socket: Socket): void {
         const socketId = socket.id;
         socket.on(MESSAGE, (data)=>this.handleMessage(data));
-        socket.on(REGISTER, (data)=>this.handleRegister(data, socket));
-        socket.on(DISCONNECT, (reason)=>this.handleDisconnect(reason, socketId, socket ));
+        socket.on(REGISTER, (data)=>this.handleRegister(data));
+        socket.on(DISCONNECT, (reason)=>this.handleDisconnect(reason, socketId));
     };
 
     // handleRegister({ user_id, socket_id }: { user_id: string, socket_id: string }): void {
-    handleRegister(data, socket): void {
+    handleRegister(data): void {
         const { user_id, socket_id } = data;
         const userKey = user_id.toString();
         console.log('registering user:', user_id, 'with socket:', socket_id);
@@ -33,6 +33,7 @@ export class WebSocketService {
         console.log('userSocketMap register:', this.userSocketMap);
         // emit event to all clients/users with updated userlist
         // socket.emit('userlist', Array.from(this.userSocketMap.keys()));
+        this.io.emit(USER_LIST_UPDATE, Object.keys(this.userSocketMap));
     };
 
     handleMessage(message: any): void {
@@ -45,15 +46,15 @@ export class WebSocketService {
         if (receiverSocketIdArray) {
             receiverSocketIdArray.forEach(receiverSocketId => {
                 console.log('sending message to:', receiverSocketId);
-            this.io.to(receiverSocketId).emit('message', message);
+            this.io.to(receiverSocketId).emit(MESSAGE, message);
             });
         };
     };
 
-    handleDisconnect(reason, socketId, socket): void {
+    handleDisconnect(reason, socketId): void {
         //TODO remove user_id from userSocketMap
-        console.log('socket disconnec event:', socketId, 'reason:', reason);
-        console.log('sockets before disconnect:', this.userSocketMap);
+        console.log('userSocketMap before disconnect:', this.userSocketMap);
+        console.log('socketUserMap before disconnect:', this.socketUserMap);
         if(socketId){
             const userArray = this.socketUserMap[socketId];
             if(userArray){
@@ -69,10 +70,11 @@ export class WebSocketService {
             }
             delete this.socketUserMap[socketId];
         }
-        console.log('sockets after disconnect:', this.userSocketMap);
+        console.log('userSocketMap after disconnect:', this.userSocketMap);
+        console.log('socketUserMap after disconnect:', this.socketUserMap);
 
         // emit event to all clients/users with updated userlist
-        // socket.emit(USER_LIST, Array.from(this.userSocketMap.keys()));
+        this.io.emit(USER_LIST_UPDATE, Object.keys(this.userSocketMap));
     }
 
 };
