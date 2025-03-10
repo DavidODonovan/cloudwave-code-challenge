@@ -21,6 +21,7 @@ type User = {
 
 export default function Home({ socket, getNewSocketConnection }: { socket: Socket, getNewSocketConnection: () => void }) {
   const [userList, setUserList] = useState<User[]>([]);
+  const [onlineUserIds, setOnlineUserIds] = useState<string[]>([]);
   const [user, setUser] = useState<User | null>(null);
   const [inputValue, setInputValue] = useState('');
   const [socketId, setSocketId] = useState<string | undefined>();
@@ -37,31 +38,29 @@ export default function Home({ socket, getNewSocketConnection }: { socket: Socke
     console.log('fetch users called')
     fetch(API_URL_USERS)
       .then(res => res.json())
-      .then(users => setUserList(users))
+      .then(users => {
+        console.log("Fetched users:", users);
+        const onlineUsers = handleUpdateUserStatuses(users);
+        console.log({onlineUsers})
+        if(onlineUsers){
+          setUserList(onlineUsers);
+        }
+      })
       .catch(err => console.error("Failed to fetch users:", err));
   };
 
-  const handleUpdateUserStatuses= (data: any) => {
-    console.log("handleUpdateUserStatuses called", data)
-    console.log("typeof data", typeof data[0])
-    if(userList.length === 0) return;
-    console.log('hellooooooooo')
-    console.log('hellooooooooo')
-    console.log('hellooooooooo')
-    console.log('hellooooooooo')
-    console.log('hellooooooooo')
-    console.log('hellooooooooo')
-    console.log('hellooooooooo')
-    console.log('hellooooooooo')
-    const onlineIdsSet = new Set(data);
-
-    const updatedUserList = userList.map(user => {
-      return {...user,
-        // Set online to true if user's ID is in the onlineIdsSet, otherwise false
-        online: onlineIdsSet.has(user.id.toString())
-      };
-    });
-    setUserList(updatedUserList);
+  const handleUpdateUserStatuses= (users: User[]) => {
+    if(userList.length>0) {
+      const onlineIdsSet = new Set(onlineUserIds);
+  
+      const updatedUserList = users.map(user => {
+        return {...user,
+          // Set online to true if user's ID is in the onlineIdsSet, otherwise false
+          online: onlineIdsSet.has(user.id.toString())
+        };
+      });
+      return updatedUserList;
+    }
   }
 
   // Fetch user list once on component mount
@@ -76,6 +75,8 @@ export default function Home({ socket, getNewSocketConnection }: { socket: Socke
       setUser(currentUser);
     }
   }, [userList, userId]);
+
+  useEffect(() => { console.log({onlineUserIds})},[onlineUserIds])
 
   // Set up socket listeners and handle cleanup
   useEffect(() => {
@@ -99,7 +100,7 @@ export default function Home({ socket, getNewSocketConnection }: { socket: Socke
     // Register connect handler
     socket.on(CONNECT, handleConnect);
     socket.on(MESSAGE, handleMessage);
-    socket.on(USER_LIST_UPDATE, handleUpdateUserStatuses);
+    socket.on(USER_LIST_UPDATE, setOnlineUserIds);
 
     // If already connected, register immediately
     if (socket.connected) {
@@ -111,7 +112,7 @@ export default function Home({ socket, getNewSocketConnection }: { socket: Socke
     return () => {
       socket.off(CONNECT, handleConnect);
       socket.off(MESSAGE, handleMessage);
-      socket.off(USER_LIST_UPDATE, handleUpdateUserStatuses)
+      socket.off(USER_LIST_UPDATE, setOnlineUserIds)
     };
   }, [socket, userId]);
 
