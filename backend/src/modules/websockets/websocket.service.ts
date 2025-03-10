@@ -5,7 +5,6 @@ export class WebSocketService {
 
     private userSocketMap = {};
     private socketUserMap = {};
-    
 
     constructor(
       private io: IOServer,
@@ -31,7 +30,7 @@ export class WebSocketService {
         console.log('registering user:', user_id, 'with socket:', socket_id);
         this.userSocketMap[userKey] ? this.userSocketMap[userKey].push(socket_id) : this.userSocketMap[userKey] = [socket_id];
         this.socketUserMap[socket_id] ? this.socketUserMap[socket_id].push(user_id) : this.socketUserMap[socket_id] = [user_id];
-        console.log('sockets register:', this.userSocketMap);
+        console.log('userSocketMap register:', this.userSocketMap);
         // emit event to all clients/users with updated userlist
         // socket.emit('userlist', Array.from(this.userSocketMap.keys()));
     };
@@ -53,13 +52,27 @@ export class WebSocketService {
 
     handleDisconnect(reason, socketId, socket): void {
         //TODO remove user_id from userSocketMap
-        console.log('socket disconnected:', socketId, 'reason:', reason);
+        console.log('socket disconnec event:', socketId, 'reason:', reason);
+        console.log('sockets before disconnect:', this.userSocketMap);
         if(socketId){
-        //   this.userSocketMap.delete(socketId);
+            const userArray = this.socketUserMap[socketId];
+            if(userArray){
+                userArray.forEach(user_id => {
+                    const socketArray = this.userSocketMap[user_id];
+                    if(socketArray){
+                        const index = socketArray.indexOf(socketId);
+                        if(index > -1){
+                            socketArray.splice(index, 1);
+                        }
+                    }
+                });
+            }
+            delete this.socketUserMap[socketId];
+        }
+        console.log('sockets after disconnect:', this.userSocketMap);
+
         // emit event to all clients/users with updated userlist
         // socket.emit(USER_LIST, Array.from(this.userSocketMap.keys()));
-        console.log('socket should have emitted:');
-        }
     }
 
 };

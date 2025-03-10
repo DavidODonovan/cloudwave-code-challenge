@@ -12,13 +12,11 @@ export default function Routes() {
     return io(config.SOCKET_ENDPOINT, { transports: ['websocket', 'polling'] })}
   );
 
+  // we pass this function to Home component to get a new socket connection when client selects different user.
   const handleGetNewSocketConnection = () => {
     if(socket){
-      console.log("disconnecting socket");
       socket.disconnect();
-      console.log("creating new socket");
       setSocket(io(config.SOCKET_ENDPOINT, { transports: ['websocket', 'polling'] }));
-      console.log("new socket created", socket);
     }
   };
 

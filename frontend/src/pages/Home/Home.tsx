@@ -11,7 +11,7 @@ import {
   CarouselPrevious,
 } from "@/components/ui/carousel";
 
-import { CONNECT, MESSAGE, REGISTER, USER_LIST } from '../../constants'
+import { API_URL_USERS, CONNECT, MESSAGE, REGISTER } from '../../constants'
 
 type User = {
   id: string;
@@ -23,94 +23,97 @@ export default function Home({ socket, getNewSocketConnection }: { socket: Socke
   const [user, setUser] = useState<User | null>(null);
   const [inputValue, setInputValue] = useState('');
   const [socketId, setSocketId] = useState<string | undefined>();
-  const [userId, setUserId] = useState(() => {
-    // Check if userId exists in localStorage during initialization
-    const savedUserId = localStorage.getItem('cloudWaveChatId');
-    return savedUserId || '';
-  });
+  const [userId, setUserId] = useState(() => localStorage.getItem('cloudWaveChatId') || '');
 
-  useEffect(() => {
-    if (userId) {
-      localStorage.setItem('cloudWaveChatId', userId);
-      getNewSocketConnection();
-    }
-  }, [userId]);
+  // Handle user ID changes - save to localStorage and get new socket
+  const handleUserChange = (newUserId: string) => {
+    localStorage.setItem('cloudWaveChatId', newUserId);
+    setUserId(newUserId);
+    getNewSocketConnection();
+  };
 
+  // Fetch user list once on component mount
   useEffect(() => {
-    const handleFetchUserList = async () => {
-      const users = await fetch('http://localhost:3001/api/users').then((res) => res.json());
-      setUserList(users);
-    };
-    handleFetchUserList();
+    fetch(API_URL_USERS)
+      .then(res => res.json())
+      .then(users => setUserList(users))
+      .catch(err => console.error("Failed to fetch users:", err));
   }, []);
 
-  useEffect(()=>{
-    const user = userList.find((user) => user.id.toString() === userId);
-    console.log("user should be:", user);
-    console.log("user should be:", userList);
-    if(user){
-    setUser(user);
+  // Update current user when userList or userId changes
+  useEffect(() => {
+    const currentUser = userList.find(u => u.id.toString() === userId);
+    if (currentUser) {
+      setUser(currentUser);
     }
   }, [userList, userId]);
 
-  useEffect(()=>{
+  // Set up socket listeners and handle cleanup
+  useEffect(() => {
+    // Only set up listeners if socket exists
+    if (!socket) return;
 
-    socket.on(CONNECT, () => {
+    const handleConnect = () => {
+      console.log('Socket connected with ID:', socket.id);
       setSocketId(socket.id);
-      socket.emit(REGISTER, { user_id: userId, socket_id: socket.id });
-    });
+      
+      // Only register if we have a userId
+      if (userId) {
+        socket.emit(REGISTER, { user_id: userId, socket_id: socket.id });
+      }
+    };
 
-    if(socket.connected){
-      socket.emit(REGISTER, { user_id: userId, socket_id: socket.id });
+    const handleMessage = (message: any) => {
+      console.log('Message received:', message);
+    };
+
+    // Register connect handler
+    socket.on(CONNECT, handleConnect);
+    socket.on(MESSAGE, handleMessage);
+
+    // If already connected, register immediately
+    if (socket.connected) {
+      handleConnect();
     }
-    socket.on(MESSAGE, (message) => {
-      console.log('message received:', message);
-    });
 
-    socket.on(USER_LIST, (userlist) => {
-      console.log('userlist:', userlist);
-    });
-
+    // Cleanup function to remove listeners when component unmounts
+    // or when socket changes
+    return () => {
+      socket.off(CONNECT, handleConnect);
+      socket.off(MESSAGE, handleMessage);
+    };
   }, [socket, userId]);
 
-
-  //TODO: send message, if message is received, go to chat page and set url params to receiver user_id.
-  // When in chat page, fetch messages from database with both user ids.
-
   const handleSendMessage = () => {
-    if (socket.connected) {
-      socket.emit('message', {
-        sender_user_id: userId, 
-        sender_socket_id: socket.id,
-        receiver_user_id: '1',
-        message: inputValue
-      });
-      setInputValue('');
-    }
-  }
-
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      handleSendMessage();
-    }
+    if (!socket.connected || !inputValue.trim()) return;
+    
+    socket.emit('message', {
+      sender_user_id: userId,
+      sender_socket_id: socket.id,
+      receiver_user_id: '1',
+      message: inputValue
+    });
+    
+    setInputValue('');
   };
 
   return (
     <Card className="flex flex-col items-center justify-center min-h-svh">
-      {user && user.name}{userId}
+      <p className="text-4xl font-semibold">Hello {user?.name || ''}</p>
+      
       <Carousel className="w-full max-w-xs">
         <CarouselContent>
           {userList.map((user, index) => (
             <CarouselItem key={index}>
               <div className="p-1">
                 <Card>
-                  <CardContent className="flex items-center justify-center p-2">
+                  <CardContent className="flex items-center justify-center">
                     <Button 
                       variant="ghost" 
-                      className="text-4xl font-semibold hover:cursor-pointer"
-                      onClick={()=>{setUserId(user.id.toString())}}
-                      >
-                        {user.name}
+                      className="text-xl font-semibold hover:cursor-pointer"
+                      onClick={() => handleUserChange(user.id.toString())}
+                    >
+                      {user.name}
                     </Button>
                   </CardContent>
                 </Card>
@@ -121,20 +124,26 @@ export default function Home({ socket, getNewSocketConnection }: { socket: Socke
         <CarouselPrevious />
         <CarouselNext />
       </Carousel>
+      
       <div className="flex flex-col items-center justify-center min-h-svh">
-        <div>here is the socketId: {socketId}</div>
-        <Input
-          value={inputValue}
-          onChange={(e) => setInputValue(e.target.value)}
-          onKeyDown={handleKeyDown}
-          placeholder="Type a message..."
-          className="flex-grow"
-        />
-        <Button variant={"outline"} onClick={handleSendMessage}>Send message</Button>
-        {userList.map((user) => (
-          <div key={user.id}>{user.name}</div>
-        ))}
+        <div>Socket ID: {socketId || "Not connected"}</div>
+        <div className="flex w-full gap-2 mt-4">
+          <Input
+            value={inputValue}
+            onChange={(e) => setInputValue(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
+            placeholder="Type a message..."
+            className="flex-grow"
+          />
+          <Button variant="outline" onClick={handleSendMessage}>Send message</Button>
+        </div>
+        
+        <div className="mt-4">
+          {userList.map((user) => (
+            <div key={user.id}>{user.name}</div>
+          ))}
+        </div>
       </div>
     </Card>
-  )
+  );
 }
