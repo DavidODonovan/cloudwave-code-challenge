@@ -34,7 +34,7 @@ export class WebSocketService {
         console.log('message received', message);
         this.io.emit('message', message);
         console.log('message sent to all clients');
-        // emit message event to recipient and save message to database messages table.
+        // TODO emit message event to recipient using message.receiver_id and save message to database messages table with both ids.
     }
 
 };
