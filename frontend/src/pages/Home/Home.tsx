@@ -137,12 +137,14 @@ export default function Home({ socket, getNewSocketConnection }: { socket: Socke
   const filteredUserList = userList.filter(u => u.id.toString() !== userId);
 
   return (
-    <Card className="flex flex-col items-center justify-center min-h-svh ">
-      <p className="text-4xl font-semibold">You are logged in as</p>
-      <p className="text-4xl font-semibold">{user?.name || ''}</p>
+    <Card className="flex flex-col items-center justify-around min-h-svh ">
+      <Card className="flex flex-col items-center justify-center p-8">
+      <h2 className="text-4xl font-semibold">You are logged in as</h2>
+      <h2 className="text-4xl font-semibold">{user?.name || ''}</h2>
       <UserList users={filteredUserList} handleUserChange={handleUserChange} />
+      </Card>
       
-      <div className="flex flex-col items-center justify-center min-h-svh">
+      <div className="flex flex-col items-center justify-center ">
         <div className="flex w-full gap-2 mt-4">
           <Input
             value={inputValue}
@@ -154,15 +156,22 @@ export default function Home({ socket, getNewSocketConnection }: { socket: Socke
           <Button variant="outline" onClick={handleSendMessage}>Send message</Button>
         </div>
         
-        <div className="mt-4">
-          {filteredUserList.map((user) => {
-            return (
-              <div key={user.id}>
-                <div>{user.online ? '🟢' : '🔴'} {user.name}</div>
-              </div>
-            )
-          })}
-        </div>
+        <Card className='flex flex-col items-center justify-center p-4 mt-4'>
+          <h2 className="text-2xl font-semibold">Who do you want to message?</h2>
+          <div className="flex flex-col py-4">
+              {filteredUserList.map((user) => (
+                  <Button
+                    type="submit" 
+                    key={user.id}
+                    variant="ghost"
+                    className="text-xl font-semibold hover:cursor-pointer"
+                    onClick={() => handleUserChange(user.id.toString())}
+                  >
+                  {user.online ? '🟢' : '🔴'} {user.name}
+                  </Button>
+              ))}
+          </div>
+        </Card>
       </div>
     </Card>
   );

@@ -20,9 +20,11 @@ export function UserList({users, handleUserChange }: UserListProps ) {
     <Sheet>
       <SheetTrigger asChild>
         <Button 
-          className="text-xl py-6 font-semibold bg-orange-400 hover:bg-orange-600 hover:text-white text-white border-none hover:cursor-pointer"
-
-          variant="outline">Click here to change user</Button>
+          className="text-xl py-6 font-semibold bg-orange-600 hover:bg-orange-700 hover:text-white text-white border-none hover:cursor-pointer"
+          variant="outline"
+          >
+          Click here to change user
+        </Button>
       </SheetTrigger>
       <SheetContent>
         <SheetHeader>
@@ -31,21 +33,20 @@ export function UserList({users, handleUserChange }: UserListProps ) {
             Select from list below.
           </SheetDescription>
         </SheetHeader>
-          <SheetClose asChild>
-        <div className="grid gap-4 py-4">
-            {users.map((user) => (
-                <Button
-                  type="submit" 
-                  key={user.id}
-                  variant="ghost"
-                  className="text-xl font-semibold hover:cursor-pointer"
-                  onClick={() => handleUserChange(user.id.toString())}>
-                  {user.name}
-                </Button>
-            ))}
-
-        </div>
-          </SheetClose>
+        <SheetClose asChild>
+          <div className="grid gap-4 py-4">
+              {users.map((user) => (
+                  <Button
+                    type="submit" 
+                    key={user.id}
+                    variant="ghost"
+                    className="text-xl font-semibold hover:cursor-pointer"
+                    onClick={() => handleUserChange(user.id.toString())}>
+                    {user.name}
+                  </Button>
+              ))}
+          </div>
+        </SheetClose>
       </SheetContent>
     </Sheet>
   )
