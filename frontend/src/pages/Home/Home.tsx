@@ -48,13 +48,15 @@ export default function Home({ socket }: { socket: Socket }) {
     if(socket.connected){
       socket.emit('register', { user_id: userId, socket_id: socket.id });
     }
+    socket.on('message', (message) => {
+      console.log('message received:', message);
+    });
   }, [socket, userId]);
 
 
 
   const handleSendMessage = () => {
     if (socket.connected) {
-      console.log("helloo I am connected...", inputValue)
       socket.emit('message', {
         sender_user_id: userId, 
         sender_socket_id: socket.id,
