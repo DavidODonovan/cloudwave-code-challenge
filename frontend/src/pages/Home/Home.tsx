@@ -51,6 +51,8 @@ export default function Home({ socket }: { socket: Socket }) {
     socket.on('message', (message) => {
       console.log('message received:', message);
     });
+
+    
   }, [socket, userId]);
 
 

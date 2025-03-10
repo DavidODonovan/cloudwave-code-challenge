@@ -20,14 +20,18 @@ export class WebSocketService {
     handleConnection(socket: Socket): void {
         const socketId = socket.id;
         socket.on('message', (data)=>this.handleMessage(data));
-        socket.on('register', (data)=>this.handleRegister(data));
-        socket.on('disconnect', (reason)=>this.handleDisconnect(reason, socketId ));
+        socket.on('register', (data)=>this.handleRegister(data, socket));
+        socket.on('disconnect', (reason)=>this.handleDisconnect(reason, socketId, socket ));
     };
 
-    handleRegister({ user_id, socket_id }: { user_id: string, socket_id: string }): void {
+    // handleRegister({ user_id, socket_id }: { user_id: string, socket_id: string }): void {
+    handleRegister(data, socket): void {
+        const { user_id, socket_id } = data;
         console.log('registering user:', user_id, 'with socket:', socket_id);
         this.socketsMap.set(user_id, socket_id);
         console.log('sockets register:', this.socketsMap);
+        // emit event to all clients/users with updated userlist
+        socket.emit('userlist', Array.from(this.socketsMap.keys()));
     };
 
     handleMessage(message: any): void {
@@ -41,12 +45,14 @@ export class WebSocketService {
         };
     };
 
-    handleDisconnect(reason, socketId): void {
+    handleDisconnect(reason, socketId, socket): void {
         //TODO remove user_id from socketsMap
         console.log('socket disconnected:', socketId, 'reason:', reason);
         if(socketId){
           this.socketsMap.delete(socketId);
         }
+        // emit event to all clients/users with updated userlist
+        socket.emit('userlist', Array.from(this.socketsMap.keys()));
     }
 
 };
