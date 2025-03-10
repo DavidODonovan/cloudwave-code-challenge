@@ -1,7 +1,15 @@
 import { useEffect, useState } from 'react';
 import { Socket } from 'socket.io-client';
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input"
+import { Input } from "@/components/ui/input";
+import { Card, CardContent } from "@/components/ui/card"
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/ui/carousel"
 
 type User = {
   id: string;
@@ -12,6 +20,7 @@ export default function Home({ socket }: { socket: Socket }) {
   const [userList, setUserList] = useState<User[]>([]);
   const [inputValue, setInputValue] = useState('');
   const [socketId, setSocketId] = useState<string | undefined>();
+  // const [ userId, setUserId ] = useState<string | undefined>();
 
   useEffect(() => {
     const handleFetchUserList = async () => {
@@ -53,7 +62,24 @@ export default function Home({ socket }: { socket: Socket }) {
   };
 
   return (
-    <div>
+    <Card className="flex flex-col items-center justify-center min-h-svh">
+          <Carousel className="w-full max-w-xs">
+      <CarouselContent>
+        {Array.from({ length: 5 }).map((_, index) => (
+          <CarouselItem key={index}>
+            <div className="p-1">
+              <Card>
+                <CardContent className="flex items-center justify-center p-2">
+                  <span className="text-4xl font-semibold">{index + 1}nn</span>
+                </CardContent>
+              </Card>
+            </div>
+          </CarouselItem>
+        ))}
+      </CarouselContent>
+      <CarouselPrevious />
+      <CarouselNext />
+    </Carousel>
       <div className="flex flex-col items-center justify-center min-h-svh">
         <div>here is the socketId: {socketId}</div>
         <Input
@@ -68,6 +94,6 @@ export default function Home({ socket }: { socket: Socket }) {
           <div key={user.id}>{user.name}</div>
         ))}
       </div>
-    </div>
+    </Card>
   )
 }
