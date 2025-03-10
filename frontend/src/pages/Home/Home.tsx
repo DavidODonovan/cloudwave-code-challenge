@@ -18,7 +18,7 @@ type User = {
   name: string;
 };
 
-export default function Home({ socket }: { socket: Socket }) {
+export default function Home({ socket, getNewSocketConnection }: { socket: Socket, getNewSocketConnection: () => void }) {
   const [userList, setUserList] = useState<User[]>([]);
   const [user, setUser] = useState<User | null>(null);
   const [inputValue, setInputValue] = useState('');
@@ -32,6 +32,7 @@ export default function Home({ socket }: { socket: Socket }) {
   useEffect(() => {
     if (userId) {
       localStorage.setItem('cloudWaveChatId', userId);
+      getNewSocketConnection();
     }
   }, [userId]);
 
@@ -53,10 +54,12 @@ export default function Home({ socket }: { socket: Socket }) {
   }, [userList, userId]);
 
   useEffect(()=>{
+
     socket.on(CONNECT, () => {
       setSocketId(socket.id);
       socket.emit(REGISTER, { user_id: userId, socket_id: socket.id });
     });
+
     if(socket.connected){
       socket.emit(REGISTER, { user_id: userId, socket_id: socket.id });
     }
