@@ -18,20 +18,20 @@ export class WebSocketService {
     }
 
     handleConnection(socket: Socket): void {
-        socket.on('message', this.handleMessage.bind(this));
-        socket.on('register', this.handleRegister.bind(this));
-    }
+        const socketId = socket.id;
+        socket.on('message', (data)=>this.handleMessage(data));
+        socket.on('register', (data)=>this.handleRegister(data));
+        socket.on('disconnect', (reason)=>this.handleDisconnect(reason, socketId ));
+    };
 
     handleRegister({ user_id, socket_id }: { user_id: string, socket_id: string }): void {
-        console.log('new register event:', user_id, socket_id);
-
-        //TODO map user_id to socket_id object
+        console.log('registering user:', user_id, 'with socket:', socket_id);
         this.socketsMap.set(user_id, socket_id);
-        console.log('sockets:', this.socketsMap);
-    }
+        console.log('sockets register:', this.socketsMap);
+    };
 
     handleMessage(message: any): void {
-        console.log('message received', message);
+        console.log('websocket message received', message);
         // TODO emit message event to recipient using message.receiver_id and save message to database messages table with both ids.
         const receiverSocketId = this.socketsMap.get(message.receiver_user_id);
         console.log({receiverSocketId});
@@ -39,6 +39,14 @@ export class WebSocketService {
         if (receiverSocketId) {
             this.io.to(receiverSocketId).emit('message', message);
         };
+    };
+
+    handleDisconnect(reason, socketId): void {
+        //TODO remove user_id from socketsMap
+        console.log('socket disconnected:', socketId, 'reason:', reason);
+        if(socketId){
+          this.socketsMap.delete(socketId);
+        }
     }
 
 };
