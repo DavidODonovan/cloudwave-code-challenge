@@ -46,11 +46,19 @@ export default function Home({ socket, getNewSocketConnection }: { socket: Socke
     console.log("typeof data", typeof data[0])
     if(userList.length === 0) return;
     console.log('hellooooooooo')
+    console.log('hellooooooooo')
+    console.log('hellooooooooo')
+    console.log('hellooooooooo')
+    console.log('hellooooooooo')
+    console.log('hellooooooooo')
+    console.log('hellooooooooo')
+    console.log('hellooooooooo')
+    const onlineIdsSet = new Set(data);
 
     const updatedUserList = userList.map(user => {
       return {...user,
         // Set online to true if user's ID is in the onlineIdsSet, otherwise false
-        online: data.has(user.id.toString())
+        online: onlineIdsSet.has(user.id.toString())
       };
     });
     setUserList(updatedUserList);
@@ -68,10 +76,6 @@ export default function Home({ socket, getNewSocketConnection }: { socket: Socke
       setUser(currentUser);
     }
   }, [userList, userId]);
-
-  useEffect(()=>{
-    console.log({userList})
-  },[userList])
 
   // Set up socket listeners and handle cleanup
   useEffect(() => {
@@ -166,12 +170,15 @@ export default function Home({ socket, getNewSocketConnection }: { socket: Socke
         </div>
         
         <div className="mt-4">
-          {userList.map((user) => (
-            <div key={user.id}>
-              {/* <div>{user.online ? '🟢' : '🔴'} {user.name}</div> */}
-              <div>{user.online ? '🟢' : '🔴'} {user.name}</div>
-            </div>
-          ))}
+          {userList.map((user) => {
+            if(user.id === userId) return;
+            return (
+              <div key={user.id}>
+                <div>{user.online ? '🟢' : '🔴'} {user.name}</div>
+              </div>
+            )
+          })}
+          
         </div>
       </div>
     </Card>
