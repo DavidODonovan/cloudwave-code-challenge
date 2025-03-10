@@ -2,22 +2,11 @@ import { useEffect, useState } from 'react';
 import { Socket } from 'socket.io-client';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent } from "@/components/ui/card"
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
-} from "@/components/ui/carousel";
+import { Card } from "@/components/ui/card"
+import { UserList } from '@/components/ui/userList';
 
 import { API_URL_USERS, CONNECT, MESSAGE, REGISTER, USER_LIST_UPDATE} from '../../constants';
-
-type User = {
-  id: string;
-  name: string;
-  online?: boolean;
-};
+import { User } from '@/types';
 
 export default function Home({ socket, getNewSocketConnection }: { socket: Socket, getNewSocketConnection: () => void }) {
   const [userList, setUserList] = useState<User[]>([]);
@@ -100,8 +89,8 @@ export default function Home({ socket, getNewSocketConnection }: { socket: Socke
     if (!socket) return;
 
     const handleConnect = () => {
-      console.log('Socket connected with ID:', socket.id);
       setSocketId(socket.id);
+      console.log('Socket connected with ID:', socketId);
       
       // Only register if we have a userId
       if (userId) {
@@ -148,35 +137,12 @@ export default function Home({ socket, getNewSocketConnection }: { socket: Socke
   const filteredUserList = userList.filter(u => u.id.toString() !== userId);
 
   return (
-    <Card className="flex flex-col items-center justify-center min-h-svh">
-      <p className="text-4xl font-semibold">Hello {user?.name || ''}</p>
-      
-      <Carousel className="w-full max-w-xs">
-        <CarouselContent>
-          {userList.map((user, index) => (
-            <CarouselItem key={index}>
-              <div className="p-1">
-                <Card>
-                  <CardContent className="flex items-center justify-center">
-                    <Button 
-                      variant="ghost" 
-                      className="text-xl font-semibold hover:cursor-pointer"
-                      onClick={() => handleUserChange(user.id.toString())}
-                    >
-                      {user.name}
-                    </Button>
-                  </CardContent>
-                </Card>
-              </div>
-            </CarouselItem>
-          ))}
-        </CarouselContent>
-        <CarouselPrevious />
-        <CarouselNext />
-      </Carousel>
+    <Card className="flex flex-col items-center justify-center min-h-svh ">
+      <p className="text-4xl font-semibold">You are logged in as</p>
+      <p className="text-4xl font-semibold">{user?.name || ''}</p>
+      <UserList users={filteredUserList} handleUserChange={handleUserChange} />
       
       <div className="flex flex-col items-center justify-center min-h-svh">
-        <div>Socket ID: {socketId || "Not connected"}</div>
         <div className="flex w-full gap-2 mt-4">
           <Input
             value={inputValue}
