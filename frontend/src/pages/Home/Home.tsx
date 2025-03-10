@@ -40,27 +40,34 @@ export default function Home({ socket, getNewSocketConnection }: { socket: Socke
       .then(res => res.json())
       .then(users => {
         console.log("Fetched users:", users);
-        const onlineUsers = handleUpdateUserStatuses(users);
-        console.log({onlineUsers})
-        if(onlineUsers){
-          setUserList(onlineUsers);
+        
+        // Always set the userList with the fetched users first
+        setUserList(users);
+        
+        // Then apply online statuses if we have online user IDs
+        if (onlineUserIds.length > 0) {
+          const updatedUsers = handleUpdateUserStatuses(users);
+          if (updatedUsers) {
+            setUserList(updatedUsers);
+          }
         }
       })
       .catch(err => console.error("Failed to fetch users:", err));
   };
 
-  const handleUpdateUserStatuses= (users: User[]) => {
-    if(userList.length>0) {
-      const onlineIdsSet = new Set(onlineUserIds);
-  
-      const updatedUserList = users.map(user => {
-        return {...user,
-          // Set online to true if user's ID is in the onlineIdsSet, otherwise false
-          online: onlineIdsSet.has(user.id.toString())
-        };
-      });
-      return updatedUserList;
-    }
+  const handleUpdateUserStatuses = (users: User[]) => {
+    // Remove the conditional that was causing the function to return undefined
+    const onlineIdsSet = new Set(onlineUserIds);
+    
+    const updatedUserList = users.map(user => {
+      return {
+        ...user,
+        // Set online to true if user's ID is in the onlineIdsSet, otherwise false
+        online: onlineIdsSet.has(user.id.toString())
+      };
+    });
+    
+    return updatedUserList;
   }
 
   // Fetch user list once on component mount
@@ -76,7 +83,16 @@ export default function Home({ socket, getNewSocketConnection }: { socket: Socke
     }
   }, [userList, userId]);
 
-  useEffect(() => { console.log({onlineUserIds})},[onlineUserIds])
+  // Update user list when online user IDs change
+  useEffect(() => { 
+    console.log({onlineUserIds});
+    
+    // Only update if we have both online IDs and a user list
+    if (onlineUserIds.length > 0 && userList.length > 0) {
+      const updatedUsers = handleUpdateUserStatuses([...userList]);
+      setUserList(updatedUsers);
+    }
+  }, [onlineUserIds]);
 
   // Set up socket listeners and handle cleanup
   useEffect(() => {
@@ -180,7 +196,6 @@ export default function Home({ socket, getNewSocketConnection }: { socket: Socke
               </div>
             )
           })}
-          
         </div>
       </div>
     </Card>
