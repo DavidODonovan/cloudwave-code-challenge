@@ -4,11 +4,12 @@ import { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { CONNECTION, MESSAGE, REGISTER, DISCONNECT, USER_LIST } from '../../constants';
 export class WebSocketService {
 
-    private socketsMap = new Map<string, string>();
+    private userSocketMap = new Map<string, string>();
+    private socketUserMap = new Map<string, string>();
+    
 
     constructor(
       private io: IOServer,
-      private db: NodePgDatabase
     ) {
         this.initialize();
     }
@@ -28,30 +29,31 @@ export class WebSocketService {
     handleRegister(data, socket): void {
         const { user_id, socket_id } = data;
         console.log('registering user:', user_id, 'with socket:', socket_id);
-        this.socketsMap.set(user_id, socket_id);
-        console.log('sockets register:', this.socketsMap);
+        this.userSocketMap.set(user_id, socket_id);
+        this.socketUserMap.set(socket_id, user_id);
+        console.log('sockets register:', this.userSocketMap);
         // emit event to all clients/users with updated userlist
-        socket.emit('userlist', Array.from(this.socketsMap.keys()));
+        socket.emit('userlist', Array.from(this.userSocketMap.keys()));
     };
 
     handleMessage(message: any): void {
-        console.log('websocket message received', message);
+        console.log('handleMessage: message received', message);
+        console.log('handleMessage: sockets:', this.userSocketMap);
         // TODO emit message event to recipient using message.receiver_id and save message to database messages table with both ids.
-        const receiverSocketId = this.socketsMap.get(message.receiver_user_id);
+        const receiverSocketId = this.userSocketMap.get(message.receiver_user_id);
         console.log({receiverSocketId});
-        console.log('sockets:', this.socketsMap);
         if (receiverSocketId) {
             this.io.to(receiverSocketId).emit('message', message);
         };
     };
 
     handleDisconnect(reason, socketId, socket): void {
-        //TODO remove user_id from socketsMap
+        //TODO remove user_id from userSocketMap
         console.log('socket disconnected:', socketId, 'reason:', reason);
         if(socketId){
-          this.socketsMap.delete(socketId);
+          this.userSocketMap.delete(socketId);
         // emit event to all clients/users with updated userlist
-        socket.emit(USER_LIST, Array.from(this.socketsMap.keys()));
+        socket.emit(USER_LIST, Array.from(this.userSocketMap.keys()));
         console.log('socket should have emitted:');
         }
     }

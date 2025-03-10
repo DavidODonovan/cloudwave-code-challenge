@@ -39,7 +39,7 @@ const usersController = new UsersController(db).router;
 app.use('/api/users/', usersController);
 
 // Initialize WebSocket service
-const webSocketService = new WebSocketService(io, db);
+const webSocketService = new WebSocketService(io);
 
 // start server
 httpServer.listen(CONFIG.PORT, async () => {
