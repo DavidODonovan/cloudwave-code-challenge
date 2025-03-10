@@ -23,14 +23,12 @@ export default function Home({ socket }: { socket: Socket }) {
   const [userId, setUserId] = useState(() => {
     // Check if userId exists in localStorage during initialization
     const savedUserId = localStorage.getItem('cloudWaveChatId');
-    console.log('User ID retrieved from localStorage:', savedUserId);
     return savedUserId || '';
   });
 
   useEffect(() => {
     if (userId) {
       localStorage.setItem('cloudWaveChatId', userId);
-      console.log('User ID saved to localStorage:', userId);
     }
   }, [userId]);
 
@@ -42,20 +40,15 @@ export default function Home({ socket }: { socket: Socket }) {
     handleFetchUserList();
   }, []);
 
-  useEffect(() => {
-    console.log('userList====>', userList);
-  }, [userList]);
-
   useEffect(()=>{
     socket.on('connect', () => {
-      console.log('Connected with ID:', socket.id);
       setSocketId(socket.id);
-      socket.emit('register', { user_id: 'some_user_id', socket_id: socket.id });
+      socket.emit('register', { user_id: userId, socket_id: socket.id });
     });
-    socket.on('message', (message) => {
-      console.log('message received', message);
-    });
-  }, [socket]);
+    if(socket.connected){
+      socket.emit('register', { user_id: userId, socket_id: socket.id });
+    }
+  }, [socket, userId]);
 
 
   const handleSendMessage = () => {

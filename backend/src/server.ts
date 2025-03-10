@@ -56,6 +56,9 @@ io.on('connection', (socket) => {
     io.emit('message', message);
     console.log('message sent to all clients');
   });
+  socket.on('register', ({ user_id, socket_id }) => {
+    console.log('new register event:', user_id, socket_id);
+  })
 });
 
 // start server
