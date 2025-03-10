@@ -128,6 +128,8 @@ export default function Home({ socket, getNewSocketConnection }: { socket: Socke
     setInputValue('');
   };
 
+  const filteredUserList = userList.filter(u => u.id.toString() !== userId);
+
   return (
     <Card className="flex flex-col items-center justify-center min-h-svh">
       <p className="text-4xl font-semibold">Hello {user?.name || ''}</p>
@@ -170,8 +172,7 @@ export default function Home({ socket, getNewSocketConnection }: { socket: Socke
         </div>
         
         <div className="mt-4">
-          {userList.map((user) => {
-            if(user.id === userId) return;
+          {filteredUserList.map((user) => {
             return (
               <div key={user.id}>
                 <div>{user.online ? '🟢' : '🔴'} {user.name}</div>
