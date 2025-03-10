@@ -40,29 +40,6 @@ app.use('/api/users/', usersController);
 
 // Initialize WebSocket service
 const webSocketService = new WebSocketService(io, db);
-// // socket.io connection
-// io.on('connection', (socket) => {
-//    // Get all connected sockets
-//    const connectedSockets = io.sockets.sockets;
-//    const connectedSocketIds = Array.from(connectedSockets.keys());
-   
-//    console.log("====================================");
-//    console.log("====================================");
-//    console.log("====================================");
-//    console.log('Connected sockets:', connectedSocketIds);
-//    console.log(`Total connections: ${connectedSocketIds.length}`);
-   
-//    // You can also broadcast this information to all clients
-//    io.emit('user_count', connectedSocketIds.length);
-//   socket.on('message', (message) => {
-//     console.log('message received', message);
-//     io.emit('message', message);
-//     console.log('message sent to all clients');
-//   });
-//   socket.on('register', ({ user_id, socket_id }) => {
-//     console.log('new register event:', user_id, socket_id);
-//   })
-// });
 
 // start server
 httpServer.listen(CONFIG.PORT, async () => {
