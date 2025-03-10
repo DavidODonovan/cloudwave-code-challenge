@@ -20,7 +20,14 @@ export default function Home({ socket }: { socket: Socket }) {
   const [userList, setUserList] = useState<User[]>([]);
   const [inputValue, setInputValue] = useState('');
   const [socketId, setSocketId] = useState<string | undefined>();
-  // const [ userId, setUserId ] = useState<string | undefined>();
+  const [ userId, setUserId ] = useState<string | undefined>("0");
+
+  useEffect(() => {
+    if (userId) {
+      localStorage.setItem('cloudWaveChatId', userId);
+      console.log('User ID saved to localStorage:', userId);
+    }
+  }, [userId]);
 
   useEffect(() => {
     const handleFetchUserList = async () => {
@@ -43,7 +50,8 @@ export default function Home({ socket }: { socket: Socket }) {
     socket.on('message', (message) => {
       console.log('message received', message);
     });
-  }, [socket])
+  }, [socket]);
+
 
   const handleSendMessage = () => {
     if (socket.connected) {
@@ -63,23 +71,30 @@ export default function Home({ socket }: { socket: Socket }) {
 
   return (
     <Card className="flex flex-col items-center justify-center min-h-svh">
-          <Carousel className="w-full max-w-xs">
-      <CarouselContent>
-        {Array.from({ length: 5 }).map((_, index) => (
-          <CarouselItem key={index}>
-            <div className="p-1">
-              <Card>
-                <CardContent className="flex items-center justify-center p-2">
-                  <span className="text-4xl font-semibold">{index + 1}nn</span>
-                </CardContent>
-              </Card>
-            </div>
-          </CarouselItem>
-        ))}
-      </CarouselContent>
-      <CarouselPrevious />
-      <CarouselNext />
-    </Carousel>
+      {userId}
+      <Carousel className="w-full max-w-xs">
+        <CarouselContent>
+          {userList.map((user, index) => (
+            <CarouselItem key={index}>
+              <div className="p-1">
+                <Card>
+                  <CardContent className="flex items-center justify-center p-2">
+                    <Button 
+                      variant="ghost" 
+                      className="text-4xl font-semibold hover:cursor-pointer"
+                      onClick={()=>{setUserId(index.toString())}}
+                      >
+                        {user.name}
+                    </Button>
+                  </CardContent>
+                </Card>
+              </div>
+            </CarouselItem>
+          ))}
+        </CarouselContent>
+        <CarouselPrevious />
+        <CarouselNext />
+      </Carousel>
       <div className="flex flex-col items-center justify-center min-h-svh">
         <div>here is the socketId: {socketId}</div>
         <Input
