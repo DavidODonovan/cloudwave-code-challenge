@@ -1,8 +1,11 @@
-import { render, screen, fireEvent } from '@testing-library/react';
+import { act, render, screen, fireEvent } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
 import { BrowserRouter } from 'react-router-dom';
 import { Socket } from 'socket.io-client';
 import Chat from './Chat';
+import { Message } from '@/types';
+import { MESSAGE } from '@/constants';
+
 const createMockSocket = () => {
     const mockSocket = {
       on: vi.fn(),
@@ -58,6 +61,7 @@ vi.mock('react-router-dom', async () => {
 });
 
 describe('Chat Component', () => {
+
   it('can send message with Enter key', () => {
     const mockSocket = createMockSocket();
     
@@ -76,4 +80,25 @@ describe('Chat Component', () => {
       message: 'Testing Enter key'
     }));
   });
+
+  it('can send message with button click', () => {
+    const mockSocket = createMockSocket();
+    
+    render(
+      <BrowserRouter>
+        <Chat socket={mockSocket} />
+      </BrowserRouter>
+    );
+    
+    const input = screen.getByPlaceholderText('Type a message...');
+    const sendButton = screen.getByText('Send');
+    
+    fireEvent.change(input, { target: { value: 'Testing button click' } });
+    fireEvent.click(sendButton);
+    
+    expect(mockSocket.emit).toHaveBeenCalledWith('message', expect.objectContaining({
+      message: 'Testing button click'
+    }));
+  });
+
 });
