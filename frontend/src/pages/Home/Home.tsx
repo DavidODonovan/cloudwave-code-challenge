@@ -18,7 +18,6 @@ export default function Home({ socket, getNewSocketConnection }: { socket: Socke
   const [receiverUserId, setReceiverUserId] = useState<string | undefined>();
 
   useEffect(() => {
-    console.log("useeffect was called with receiverUserId: ", receiverUserId);
     if (receiverUserId) {
       // Navigate to chat-route when receiverUserId changes
       navigate(`/chat/${receiverUserId}/${senderUserId}`, {
@@ -35,15 +34,11 @@ export default function Home({ socket, getNewSocketConnection }: { socket: Socke
   };
 
   const handleFetchUsers = () => {
-    console.log('fetch users called')
     fetch(API_URL_USERS)
       .then(res => res.json())
       .then(users => {
-        console.log("Fetched users:", users);
-        
         // Always set the userList with the fetched users first
         setUserList(users);
-        
         // Then apply online statuses if we have online user IDs
         if (onlineUserIds.length > 0) {
           const updatedUsers = handleUpdateUserStatuses(users);
@@ -68,7 +63,7 @@ export default function Home({ socket, getNewSocketConnection }: { socket: Socke
     });
     
     return updatedUserList;
-  }
+  };
 
   // Fetch user list once on component mount
   useEffect(() => {
@@ -85,8 +80,6 @@ export default function Home({ socket, getNewSocketConnection }: { socket: Socke
 
   // Update user list when online user IDs change
   useEffect(() => { 
-    console.log({onlineUserIds});
-    
     // Only update if we have both online IDs and a user list
     if (onlineUserIds.length > 0 && userList.length > 0) {
       const updatedUsers = handleUpdateUserStatuses([...userList]);
@@ -101,8 +94,6 @@ export default function Home({ socket, getNewSocketConnection }: { socket: Socke
 
     const handleConnect = () => {
       setSocketId(socket.id);
-      console.log('Socket connected with ID:', socketId);
-      
       // Only register if we have a senderUserId
       if (senderUserId) {
         socket.emit(REGISTER, { user_id: senderUserId, socket_id: socket.id });
@@ -110,7 +101,6 @@ export default function Home({ socket, getNewSocketConnection }: { socket: Socke
     };
 
     const handleMessage = (message: Message) => {
-      console.log('Message received:', message);
       // If the message is for the current user, set the receiverUserId to sender, which will trigger a redirect to chat page.
       setReceiverUserId(message.sender_user_id);
     };
