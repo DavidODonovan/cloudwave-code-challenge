@@ -47,10 +47,11 @@ export class WebSocketService {
         const receiverUserId = message.receiver_user_id;
         const receiverSocketIdArray = this.userSocketMap[receiverUserId];
         console.log({receiverSocketIdArray});
+        const messageWithTimestamp = {...message, timestamp: new Date().toISOString()};
         if (receiverSocketIdArray) {
             receiverSocketIdArray.forEach(receiverSocketId => {
                 console.log('sending message to:', receiverSocketId);
-            this.io.to(receiverSocketId).emit(MESSAGE, message);
+            this.io.to(receiverSocketId).emit(MESSAGE, messageWithTimestamp);
             });
         };
     };

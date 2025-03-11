@@ -9,9 +9,10 @@ export type User = {
 
 
 export type Message = {
+  message: string;
+  receiver_user_id: string;
   sender_name: string;
   sender_user_id: string;
   sender_socket_id: string;
-  receiver_user_id: string;
-  message: string;
+  timestamp: string;
 }

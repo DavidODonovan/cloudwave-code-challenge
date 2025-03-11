@@ -46,7 +46,30 @@ export default function Chat({ socket }: { socket: Socket }) {
       sender_user_id: senderUserId,
       message: "I'm good, thanks for asking!",
       timestamp: "2023-05-01T14:24:00Z"
-    }
+    },
+    {
+      sender_name: "You",
+      sender_user_id: senderUserId,
+      message: "I'm good, thanks for asking!",
+      timestamp: "2023-05-01T14:24:00Z"
+    },
+    {
+      sender_name: "You",
+      sender_user_id: senderUserId,
+      message: "I'm good, thanks for asking!",
+      timestamp: "2023-05-01T14:24:00Z"
+    },    {
+      sender_name: "You",
+      sender_user_id: senderUserId,
+      message: "I'm good, thanks for asking!",
+      timestamp: "2023-05-01T14:24:00Z"
+    },
+    {
+      sender_name: "You",
+      sender_user_id: senderUserId,
+      message: "I'm good, thanks for asking!",
+      timestamp: "2023-05-01T14:24:00Z"
+    },
   ];
 
   const tags = Array.from({ length: 50 }).map(
