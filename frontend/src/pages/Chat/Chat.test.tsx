@@ -1,10 +1,10 @@
-import { act, render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
 import { BrowserRouter } from 'react-router-dom';
 import { Socket } from 'socket.io-client';
 import Chat from './Chat';
-import { Message } from '@/types';
-import { MESSAGE } from '@/constants';
+// import { Message } from '@/types';
+// import { MESSAGE } from '@/constants';
 
 const createMockSocket = () => {
     const mockSocket = {
