@@ -1,3 +1,12 @@
+## Running this app
+
+Backend is Docker, frontend is just vite.
+Go to root directory of project.
+To run backend and frontend in one go you can just goto terminal and type ```./start-app.sh```
+Alternatively you can use two terminal commands:
+1) ```docker compose up``` to start up the backend containers
+2) goto frontend dir and run ```npm run dev``` to start up the frontend.
+
 ## Generate db migration file from Prisma schema:
 ```npm run db:generate```
 
