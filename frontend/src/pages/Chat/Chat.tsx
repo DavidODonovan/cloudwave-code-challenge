@@ -87,19 +87,33 @@ export default function Chat({ socket }: { socket: Socket }) {
         </div>
         <ScrollArea className="h-72 w-48 rounded-md border">
       <div className="p-4">
-        <h4 className="mb-4 text-sm font-medium leading-none">Tags</h4>
-        {tags.map((tag) => (
-          <>
-            <div key={tag} className="text-sm">
-              {tag}
-            </div>
-          </>
-        ))}
+        {mockMessages.map((msg, index) => (
+              <div 
+                key={index} 
+                className={`flex ${msg.sender_user_id === senderUserId ? 'justify-end' : 'justify-start'}`}
+              >
+                <div 
+                  className={`max-w-xs md:max-w-md lg:max-w-lg p-3 rounded-lg ${
+                    msg.sender_user_id === senderUserId 
+                      ? 'bg-primary text-primary-foreground ml-auto' 
+                      : 'bg-muted'
+                  }`}
+                >
+                  <div className="font-semibold">
+                    {msg.sender_name}
+                  </div>
+                  <div>{msg.message}</div>
+                  <div className="text-xs opacity-70 text-right">
+                    {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                  </div>
+                </div>
+              </div>
+            ))}
       </div>
     </ScrollArea>
         
         {/* Messages area */}
-        <ScrollArea className="flex-1 p-4">
+        {/* <ScrollArea className="flex-1 p-4">
           <div className="flex flex-col gap-4">
             {mockMessages.map((msg, index) => (
               <div 
@@ -124,7 +138,7 @@ export default function Chat({ socket }: { socket: Socket }) {
               </div>
             ))}
           </div>
-        </ScrollArea>
+        </ScrollArea> */}
         
         {/* Input area */}
         <div className="p-4 border-t">
