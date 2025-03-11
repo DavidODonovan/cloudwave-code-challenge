@@ -11,21 +11,19 @@ import { User } from '@/types';
 
 export default function Home({ socket, getNewSocketConnection }: { socket: Socket, getNewSocketConnection: () => void }) {
   const navigate = useNavigate();
-  
-
   const [userList, setUserList] = useState<User[]>([]);
   const [onlineUserIds, setOnlineUserIds] = useState<string[]>([]);
   const [user, setUser] = useState<User | null>(null);
   const [inputValue, setInputValue] = useState('');
   const [socketId, setSocketId] = useState<string | undefined>();
-  const [userId, setUserId] = useState(() => localStorage.getItem('cloudWaveChatId') || '');
-  const [receiverId, setReceiverId] = useState<string | undefined>();
+  const [senderUserId, setUserId] = useState(() => localStorage.getItem('cloudWaveChatId') || '');
+  const [receiverUserId, setReceiverUserId] = useState<string | undefined>();
 
   useEffect(() => {
-    if (receiverId) {
-      navigate(`/chat/${receiverId}`); // Navigate to chat route when receiverId changes
+    if (receiverUserId) {
+      navigate(`/chat/${receiverUserId}`); // Navigate to chat route when receiverUserId changes
     }
-  }, [receiverId, navigate]);
+  }, [receiverUserId, navigate]);
 
   // Handle user ID changes - save to localStorage and get new socket
   const handleUserChange = (newUserId: string) => {
@@ -75,13 +73,13 @@ export default function Home({ socket, getNewSocketConnection }: { socket: Socke
     handleFetchUsers();
   }, []);
 
-  // Update current user when userList or userId changes
+  // Update current user when userList or senderUserId changes
   useEffect(() => {
-    const currentUser = userList.find(user => user.id.toString() === userId);
+    const currentUser = userList.find(user => user.id.toString() === senderUserId);
     if (currentUser) {
       setUser(currentUser);
     }
-  }, [userList, userId]);
+  }, [userList, senderUserId]);
 
   // Update user list when online user IDs change
   useEffect(() => { 
@@ -103,9 +101,9 @@ export default function Home({ socket, getNewSocketConnection }: { socket: Socke
       setSocketId(socket.id);
       console.log('Socket connected with ID:', socketId);
       
-      // Only register if we have a userId
-      if (userId) {
-        socket.emit(REGISTER, { user_id: userId, socket_id: socket.id });
+      // Only register if we have a senderUserId
+      if (senderUserId) {
+        socket.emit(REGISTER, { user_id: senderUserId, socket_id: socket.id });
       }
     };
 
@@ -130,13 +128,13 @@ export default function Home({ socket, getNewSocketConnection }: { socket: Socke
       socket.off(MESSAGE, handleMessage);
       socket.off(USER_LIST_UPDATE, setOnlineUserIds)
     };
-  }, [socket, userId]);
+  }, [socket, senderUserId]);
 
   const handleSendMessage = () => {
     if (!socket.connected || !inputValue.trim()) return;
     
     socket.emit('message', {
-      sender_user_id: userId,
+      sender_user_id: senderUserId,
       sender_socket_id: socket.id,
       receiver_user_id: '1',
       message: inputValue
@@ -149,13 +147,17 @@ export default function Home({ socket, getNewSocketConnection }: { socket: Socke
     console.log({receiverUserId})
     if(userList) {
       const receiver = userList.find(u => u.id.toString() === receiverUserId);
-      if(receiver && receiver?.online || !receiver?.busy) {
-        setReceiverId(receiverUserId);
+      if(receiver?.online === true && receiver?.busy !== true) {
+        setReceiverUserId(receiverUserId);
+      } else if(!receiver?.online) {
+        alert("This user is offline and cannot receive messages right now.");
+      } else if(receiver?.busy) {
+        alert("This user is busy and cannot receive messages right now.");
       }
     }
   }
 
-  const filteredUserList = userList.filter(u => u.id.toString() !== userId);
+  const filteredUserList = userList.filter(u => u.id.toString() !== senderUserId);
 
   return (
     <Card className="flex flex-col items-center justify-around min-h-svh ">
