@@ -2,33 +2,33 @@ import { useEffect, useState } from 'react';
 import { Socket } from 'socket.io-client';
 import { useNavigate } from 'react-router';
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card"
 import { UserList } from '@/components/ui/userList';
 
 import { API_URL_USERS, CONNECT, MESSAGE, REGISTER, USER_LIST_UPDATE} from '../../constants';
-import { User } from '@/types';
+import { User, Message } from '@/types';
 
 export default function Home({ socket, getNewSocketConnection }: { socket: Socket, getNewSocketConnection: () => void }) {
   const navigate = useNavigate();
   const [userList, setUserList] = useState<User[]>([]);
   const [onlineUserIds, setOnlineUserIds] = useState<string[]>([]);
   const [user, setUser] = useState<User | null>(null);
-  const [inputValue, setInputValue] = useState('');
   const [socketId, setSocketId] = useState<string | undefined>();
-  const [senderUserId, setUserId] = useState(() => localStorage.getItem('cloudWaveChatId') || '');
+  const [senderUserId, setSenderUserId] = useState(() => localStorage.getItem('cloudWaveChatId') || '');
   const [receiverUserId, setReceiverUserId] = useState<string | undefined>();
 
   useEffect(() => {
+    console.log("useeffect was called with receiverUserId: ", receiverUserId);
     if (receiverUserId) {
-      navigate(`/chat/${receiverUserId}`); // Navigate to chat route when receiverUserId changes
+      // Navigate to chat route when receiverUserId changes
+      navigate(`/chat/${receiverUserId}/${senderUserId}`);
     }
   }, [receiverUserId, navigate]);
 
   // Handle user ID changes - save to localStorage and get new socket
   const handleUserChange = (newUserId: string) => {
     localStorage.setItem('cloudWaveChatId', newUserId);
-    setUserId(newUserId);
+    setSenderUserId(newUserId);
     getNewSocketConnection();
   };
 
@@ -107,8 +107,10 @@ export default function Home({ socket, getNewSocketConnection }: { socket: Socke
       }
     };
 
-    const handleMessage = (message: any) => {
+    const handleMessage = (message: Message) => {
       console.log('Message received:', message);
+      // If the message is for the current user, set the receiverUserId to sender, which will trigger a redirect to chat page.
+      setReceiverUserId(message.sender_user_id);
     };
 
     // Register connect handler
@@ -130,21 +132,9 @@ export default function Home({ socket, getNewSocketConnection }: { socket: Socke
     };
   }, [socket, senderUserId]);
 
-  const handleSendMessage = () => {
-    if (!socket.connected || !inputValue.trim()) return;
-    
-    socket.emit('message', {
-      sender_user_id: senderUserId,
-      sender_socket_id: socket.id,
-      receiver_user_id: '1',
-      message: inputValue
-    });
-    
-    setInputValue('');
-  };
+
 
   const handleInitiateChat = (receiverUserId: string) => {
-    console.log({receiverUserId})
     if(userList) {
       const receiver = userList.find(u => u.id.toString() === receiverUserId);
       if(receiver?.online === true && receiver?.busy !== true) {
@@ -164,21 +154,10 @@ export default function Home({ socket, getNewSocketConnection }: { socket: Socke
       <Card className="flex flex-col items-center justify-center p-8">
       <h2 className="text-4xl font-semibold">You are logged in as</h2>
       <h2 className="text-4xl font-semibold">{user?.name || ''}</h2>
+      <h2 className="text-xl font-semibold">socketID: {socketId}</h2>
       <UserList users={filteredUserList} handleUserChange={handleUserChange} />
       </Card>
       
-      <div className="flex flex-col items-center justify-center ">
-        <div className="flex w-full gap-2 mt-4">
-          <Input
-            value={inputValue}
-            onChange={(e) => setInputValue(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
-            placeholder="Type a message..."
-            className="flex-grow"
-          />
-          <Button variant="outline" onClick={handleSendMessage}>Send message</Button>
-        </div>
-        
         <Card className='flex flex-col items-center justify-center p-4 mt-4'>
           <h2 className="text-2xl font-semibold">Who do you want to message?</h2>
           <div className="flex flex-col py-4">
@@ -195,7 +174,6 @@ export default function Home({ socket, getNewSocketConnection }: { socket: Socke
               ))}
           </div>
         </Card>
-      </div>
     </Card>
   );
 }
