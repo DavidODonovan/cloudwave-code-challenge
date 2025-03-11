@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Socket } from 'socket.io-client';
-import { useParams } from 'react-router-dom';
+import { useParams, useLocation } from 'react-router-dom';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { MESSAGE } from '@/constants';
@@ -8,6 +8,9 @@ import { Message } from '@/types';
 
 export default function Chat({ socket}: { socket: Socket}) {
   const [inputValue, setInputValue] = useState('');
+  const location = useLocation();
+  const { senderName } = location.state || {};
+
   if(socket){
     console.log("incoming socket chat: ", socket);
   };
@@ -21,6 +24,7 @@ export default function Chat({ socket}: { socket: Socket}) {
     if (!socket.connected || !inputValue.trim()) return;
     
     socket.emit('message', {
+      sender_name: senderName,
       sender_user_id: senderUserId,
       sender_socket_id: socket.id,
       receiver_user_id: receiverUserId,

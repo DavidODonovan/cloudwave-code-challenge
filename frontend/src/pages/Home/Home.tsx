@@ -21,7 +21,9 @@ export default function Home({ socket, getNewSocketConnection }: { socket: Socke
     console.log("useeffect was called with receiverUserId: ", receiverUserId);
     if (receiverUserId) {
       // Navigate to chat-route when receiverUserId changes
-      navigate(`/chat/${receiverUserId}/${senderUserId}`);
+      navigate(`/chat/${receiverUserId}/${senderUserId}`, {
+        state: { senderName: user?.name }
+      });
     }
   }, [receiverUserId, navigate]);
 

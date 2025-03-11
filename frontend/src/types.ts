@@ -9,6 +9,7 @@ export type User = {
 
 
 export type Message = {
+  senderName: string;
   sender_user_id: string;
   sender_socket_id: string;
   receiver_user_id: string;

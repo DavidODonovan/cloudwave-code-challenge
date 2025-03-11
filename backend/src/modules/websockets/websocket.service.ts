@@ -44,7 +44,6 @@ export class WebSocketService {
     handleMessage(message: any): void {
         console.log('handleMessage: message received', message);
         console.log('handleMessage: sockets:', this.userSocketMap);
-        // TODO emit message event to recipient using message.receiver_id and save message to database messages table with both ids.
         const receiverUserId = message.receiver_user_id;
         const receiverSocketIdArray = this.userSocketMap[receiverUserId];
         console.log({receiverSocketIdArray});
@@ -57,7 +56,6 @@ export class WebSocketService {
     };
 
     handleDisconnect(reason, socketId): void {
-        //TODO remove user_id from userSocketMap
         console.log('userSocketMap before disconnect:', this.userSocketMap);
         console.log('socketUserMap before disconnect:', this.socketUserMap);
         if(socketId){
