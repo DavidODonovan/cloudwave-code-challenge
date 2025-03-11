@@ -24,7 +24,7 @@ export default function Routes() {
     <BrowserRouter>
       <RouterRoutes>
         <Route path="/" element={<Home socket={socket} getNewSocketConnection={handleGetNewSocketConnection}/>} />
-        <Route path="/chat/:senderUserId/:receiverUserId" element={<Chat socket={socket} />} />
+        <Route path="/chat/:receiverUserId/:senderUserId" element={<Chat socket={socket} />} />
       </RouterRoutes>
     </BrowserRouter>
   );
