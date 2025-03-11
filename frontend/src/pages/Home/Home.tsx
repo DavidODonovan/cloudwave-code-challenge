@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Socket } from 'socket.io-client';
+import { useNavigate } from 'react-router';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card"
@@ -9,12 +10,22 @@ import { API_URL_USERS, CONNECT, MESSAGE, REGISTER, USER_LIST_UPDATE} from '../.
 import { User } from '@/types';
 
 export default function Home({ socket, getNewSocketConnection }: { socket: Socket, getNewSocketConnection: () => void }) {
+  const navigate = useNavigate();
+  
+
   const [userList, setUserList] = useState<User[]>([]);
   const [onlineUserIds, setOnlineUserIds] = useState<string[]>([]);
   const [user, setUser] = useState<User | null>(null);
   const [inputValue, setInputValue] = useState('');
   const [socketId, setSocketId] = useState<string | undefined>();
   const [userId, setUserId] = useState(() => localStorage.getItem('cloudWaveChatId') || '');
+  const [receiverId, setReceiverId] = useState<string | undefined>();
+
+  useEffect(() => {
+    if (receiverId) {
+      navigate(`/chat/${receiverId}`); // Navigate to chat route when receiverId changes
+    }
+  }, [receiverId, navigate]);
 
   // Handle user ID changes - save to localStorage and get new socket
   const handleUserChange = (newUserId: string) => {
@@ -134,6 +145,16 @@ export default function Home({ socket, getNewSocketConnection }: { socket: Socke
     setInputValue('');
   };
 
+  const handleInitiateChat = (receiverUserId: string) => {
+    console.log({receiverUserId})
+    if(userList) {
+      const receiver = userList.find(u => u.id.toString() === receiverUserId);
+      if(receiver && receiver?.online || !receiver?.busy) {
+        setReceiverId(receiverUserId);
+      }
+    }
+  }
+
   const filteredUserList = userList.filter(u => u.id.toString() !== userId);
 
   return (
@@ -165,7 +186,7 @@ export default function Home({ socket, getNewSocketConnection }: { socket: Socke
                     key={user.id}
                     variant="ghost"
                     className="text-xl font-semibold hover:cursor-pointer"
-                    onClick={() => handleUserChange(user.id.toString())}
+                    onClick={() => handleInitiateChat(user.id.toString())}
                   >
                   {user.online ? '🟢' : '🔴'} {user.name}
                   </Button>
