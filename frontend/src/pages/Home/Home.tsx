@@ -16,12 +16,13 @@ export default function Home({ socket, getNewSocketConnection }: { socket: Socke
   const [socketId, setSocketId] = useState<string | undefined>();
   const [senderUserId, setSenderUserId] = useState(() => localStorage.getItem('cloudWaveChatId') || '');
   const [receiverUserId, setReceiverUserId] = useState<string | undefined>();
+  const [initialMessage, setInitialMessage] = useState<Message | undefined>();
 
   useEffect(() => {
     if (receiverUserId) {
       // Navigate to chat-route when receiverUserId changes
       navigate(`/chat/${receiverUserId}/${senderUserId}`, {
-        state: { senderName: user?.name }
+        state: { senderName: user?.name, initialMessage},
       });
     }
   }, [receiverUserId, navigate]);
@@ -103,6 +104,7 @@ export default function Home({ socket, getNewSocketConnection }: { socket: Socke
     const handleMessage = (message: Message) => {
       // If the message is for the current user, set the receiverUserId to sender, which will trigger a redirect to chat page.
       setReceiverUserId(message.sender_user_id);
+      setInitialMessage(message)
     };
 
     // Register connect handler

@@ -9,11 +9,11 @@ import { MESSAGE } from '@/constants';
 import { Message } from '@/types';
 
 export default function Chat({ socket}: { socket: Socket}) {
-  const [inputValue, setInputValue] = useState('');
-  const [messages, setMessages] = useState<Message[]>([]);
   const location = useLocation();
-  const { senderName } = location.state || {};
+  const { senderName, initialMessage } = location.state || {};
   const { receiverUserId, senderUserId } = useParams<{ receiverUserId: string, senderUserId: string }>();
+  const [inputValue, setInputValue] = useState('');
+  const [messages, setMessages] = useState<Message[]>(initialMessage ? [initialMessage] : []);
 
   useEffect(() => {
     if (!socket) return;
